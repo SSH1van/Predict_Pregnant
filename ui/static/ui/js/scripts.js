@@ -8,6 +8,12 @@ function uploadPhoto(event) {
 
   if (!file) return;
 
+  // Проверка MIME-типа файла (опционально)
+  if (!file.type.match("image/jpeg")) {
+    alert("Пожалуйста, загрузите файл в формате JPG.");
+    return;
+  }
+
   const formData = new FormData();
   formData.append("image", file);
 
@@ -21,25 +27,38 @@ function uploadPhoto(event) {
         const uploadText = document.getElementById("uploadText");
         const uploadedImage = document.getElementById("uploadedImage");
 
-        // Скрываем текст и показываем изображение
         uploadText.style.display = "none";
         uploadedImage.src = data.image_url;
         uploadedImage.style.display = "block";
 
-        // Сбрасываем поле ввода
         document.getElementById("imageInput").value = "";
       } else if (data.error) {
-        alert("Ошибка загрузки фото: " + JSON.parse(data.error).image[0].message);
+        // Универсальная обработка ошибок
+        let errorMessage = "Произошла ошибка при загрузке.";
+        try {
+          const errorData = JSON.parse(data.error);
+          if (errorData.image && errorData.image[0].message) {
+            errorMessage = errorData.image[0].message;
+          } else {
+            errorMessage = "Недопустимый формат или повреждённое изображение.";
+          }
+        } catch (e) {
+          errorMessage = "Не удалось обработать ошибку.";
+        }
+        alert(`Ошибка загрузки фото: ${errorMessage}`);
       }
     })
-    .catch((error) => console.error("Error:", error));
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Произошла ошибка при загрузке фото.");
+    });
 }
 
 // Поддержка drag-and-drop
 const uploadButton = document.getElementById("uploadButton");
 uploadButton.addEventListener("dragover", (event) => {
-  event.preventDefault(); // Разрешаем drop
-  event.dataTransfer.dropEffect = "move"; // Устанавливаем эффект "перемещение"
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
   uploadButton.classList.add("dragover");
 });
 
