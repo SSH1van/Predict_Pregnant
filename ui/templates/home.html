@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ru">
   <head>
     <title>Анализ ХГЧ</title>
     <link rel="stylesheet" href="{% static 'css/reset.css' %}" />
@@ -9,10 +9,10 @@
   <body>
     <!-- Загаловок -->
     <div class="container">
-      <h3>
+      <h1>
         Загрузите фотографию анализов гормонов при беременности, выберите
         нейронную модель и получите срок беременности, применую дату зачатия
-      </h3>
+      </h1>
     </div>
 
     <!-- Загрузка изображения -->
@@ -31,7 +31,11 @@
             >Перетащите файл сюда или нажмите, чтобы просмотреть файловую
             систему</span
           >
-          <img id="uploadedImage" style="display: none" alt="Uploaded Photo" />
+          <img
+            id="uploadedImage"
+            style="display: none"
+            alt="Загруженное изображение"
+          />
         </label>
       </div>
 
