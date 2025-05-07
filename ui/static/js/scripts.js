@@ -1,4 +1,5 @@
 let currentImageUrl = null;
+let isModalManuallyClosed = false;
 
 function uploadPhoto(event) {
   let file;
@@ -35,7 +36,10 @@ function uploadPhoto(event) {
         uploadedImage.style.display = "block";
 
         currentImageUrl = data.image_url;
-        checkButton.disabled = false;
+        hcgInput.value = "";
+        checkButton.disabled = !(
+          currentImageUrl || document.getElementById("hcg-input").value
+        );
 
         document.getElementById("imageInput").value = "";
       } else if (data.error) {
@@ -78,9 +82,27 @@ uploadButton.addEventListener("drop", (event) => {
   uploadPhoto(event);
 });
 
-// Обработчик клика по кнопке "Проверить выбор"
+// Обработчик ввода в поле HCG
+const hcgInput = document.getElementById("hcg-input");
 const checkButton = document.getElementById("checkButton");
 const resultContainer = document.getElementById("resultContainer");
+const hcgModal = document.getElementById("hcgModal");
+const closeButton = document.querySelector(".close-button");
+
+hcgInput.addEventListener("input", () => {
+  checkButton.disabled = !(currentImageUrl || hcgInput.value);
+
+  if (hcgInput.value && !isModalManuallyClosed) {
+    hcgModal.style.display = "block";
+  } else if (!hcgInput.value) {
+    hcgModal.style.display = "none";
+  }
+});
+
+closeButton.addEventListener("click", () => {
+  hcgModal.style.display = "none";
+  isModalManuallyClosed = true;
+});
 
 checkButton.addEventListener("click", () => {
   const smallModel = document.getElementById("smallModel");

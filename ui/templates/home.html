@@ -11,7 +11,8 @@
     <div class="container">
       <h1>
         Загрузите фотографию анализов гормонов при беременности, выберите
-        нейронную модель и получите срок беременности, применую дату зачатия
+        нейронную модель и получите срок беременности, применую дату зачатия.
+        Можно ввести значение ХГЧ вручную.
       </h1>
     </div>
 
@@ -37,6 +38,19 @@
             alt="Загруженное изображение"
           />
         </label>
+      </div>
+
+      <!-- Ввод ХГЧ -->
+      <div class="input-container">
+        <label for="hcg-input">ХГЧ (мМЕ/мл):</label>
+        <input
+          type="number"
+          id="hcg-input"
+          name="hcg"
+          step="0.01"
+          min="0"
+          placeholder="Значение ХГЧ"
+        />
       </div>
 
       <!-- Radiobuttons -->
@@ -65,6 +79,18 @@
       <!-- Область для вывода результата -->
       <div class="result-container" id="resultContainer"></div>
     </div>
+
+    <!-- Модальное окно -->
+    <div id="hcgModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <p>
+          При заполнении данного поля не будет анализироваться изображение и
+          использоваться нейросетевая модель.
+        </p>
+      </div>
+    </div>
+
     <script src="{% static 'js/scripts.js' %}"></script>
   </body>
 </html>
