@@ -34,8 +34,33 @@
           <img id="uploadedImage" style="display: none" alt="Uploaded Photo" />
         </label>
       </div>
-    </div>
 
+      <!-- Radiobuttons -->
+      <div class="radio-container">
+        <label>
+          <input
+            type="radio"
+            name="modelSize"
+            value="small"
+            id="smallModel"
+            checked
+          />
+          Маленькая модель
+        </label>
+        <label>
+          <input type="radio" name="modelSize" value="large" id="largeModel" />
+          Большая модель
+        </label>
+      </div>
+
+      <!-- Кнопка для проверки -->
+      <div class="button-container">
+        <button id="checkButton" disabled>Анализ</button>
+      </div>
+
+      <!-- Область для вывода результата -->
+      <div class="result-container" id="resultContainer"></div>
+    </div>
     <script src="{% static 'js/scripts.js' %}"></script>
   </body>
 </html>

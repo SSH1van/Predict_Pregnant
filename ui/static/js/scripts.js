@@ -1,3 +1,5 @@
+let currentImageUrl = null;
+
 function uploadPhoto(event) {
   let file;
   if (event.type === "change") {
@@ -26,10 +28,14 @@ function uploadPhoto(event) {
       if (data.image_url) {
         const uploadText = document.getElementById("uploadText");
         const uploadedImage = document.getElementById("uploadedImage");
+        const checkButton = document.getElementById("checkButton");
 
         uploadText.style.display = "none";
         uploadedImage.src = data.image_url;
         uploadedImage.style.display = "block";
+
+        currentImageUrl = data.image_url;
+        checkButton.disabled = false;
 
         document.getElementById("imageInput").value = "";
       } else if (data.error) {
@@ -70,4 +76,28 @@ uploadButton.addEventListener("drop", (event) => {
   event.preventDefault();
   uploadButton.classList.remove("dragover");
   uploadPhoto(event);
+});
+
+// Обработчик клика по кнопке "Проверить выбор"
+const checkButton = document.getElementById("checkButton");
+const resultContainer = document.getElementById("resultContainer");
+
+checkButton.addEventListener("click", () => {
+  const smallModel = document.getElementById("smallModel");
+  const largeModel = document.getElementById("largeModel");
+  let selectedModel = null;
+
+  if (smallModel.checked) {
+    selectedModel = "Small Model";
+  } else if (largeModel.checked) {
+    selectedModel = "Large Model";
+  }
+
+  const resultText = `
+    Выбранная модель: ${selectedModel}<br>
+    Загруженное изображение: ${currentImageUrl || "Изображение не загружено"}
+  `;
+
+  resultContainer.innerHTML = resultText;
+  resultContainer.style.display = "block";
 });
