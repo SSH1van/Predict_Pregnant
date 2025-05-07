@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Анализ ХГЧ</title>
+    <link rel="stylesheet" href="{% static 'ui/css/reset.css' %}" />
+    <link rel="stylesheet" href="{% static 'ui/css/styles.css' %}" />
+  </head>
+  <body>
+    <!-- Загаловок -->
+    <div class="container">
+      <h3>
+        Загрузите фотографию анализов гормонов при беременности, выберите
+        нейронную модель и получите срок беременности, применую дату зачатия
+      </h3>
+    </div>
+
+    <!-- Загрузка изображения -->
+    <div class="container">
+      <div class="upload-container">
+        <input
+          type="file"
+          name="image"
+          id="imageInput"
+          accept="image/*"
+          style="display: none"
+          onchange="uploadPhoto(event)"
+        />
+        <label for="imageInput" class="upload-button" id="uploadButton">
+          <span id="uploadText"
+            >Перетащите файл сюда или нажмите, чтобы просмотреть файловую
+            систему</span
+          >
+          <img id="uploadedImage" style="display: none" alt="Uploaded Photo" />
+        </label>
+      </div>
+    </div>
+    
+
+    <script src="{% static 'ui/js/scripts.js' %}"></script>
+  </body>
+</html>
