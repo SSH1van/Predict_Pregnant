@@ -18,36 +18,35 @@
 
     <!-- Загрузка изображения -->
     <div class="container">
-      <div class="upload-container">
-        <input
-          type="file"
-          name="image"
-          id="imageInput"
-          accept="image/jpeg"
-          style="display: none"
-          onchange="uploadPhoto(event)"
-        />
-        <label for="imageInput" class="upload-button" id="uploadButton">
-          <span id="uploadText"
-            >Перетащите файл сюда или нажмите, чтобы просмотреть файловую
-            систему</span
-          >
-          <img
-            id="uploadedImage"
+      <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="upload-container">
+          <input
+            type="file"
+            name="image"
+            id="imageInput"
+            accept="image/jpeg"
             style="display: none"
-            alt="Загруженное изображение"
+            onchange="uploadPhoto(event)"
           />
-        </label>
-      </div>
+          <label for="imageInput" class="upload-button" id="uploadButton">
+            <span id="uploadText"
+              >Перетащите файл сюда или нажмите, чтобы просмотреть файловую
+              систему</span
+            >
+            <img
+              id="uploadedImage"
+              style="display: none"
+              alt="Загруженное изображение"
+            />
+          </label>
+        </div>
+      </form>
 
       <!-- Дата сдачи анализов -->
       <div class="input-container">
         <label for="analysis-date">Дата сдачи анализов:</label>
-        <input
-          type="date"
-          id="analysis-date"
-          name="analysis-date"
-        />
+        <input type="date" id="analysis-date" name="analysis-date" />
       </div>
 
       <!-- Ввод ХГЧ -->
@@ -83,10 +82,17 @@
 
       <!-- Примерное время обработки -->
       <div class="processing-time" id="processingTime">
-        Примерное время обработки: около минуты
+        Примерное время обработки: около 10 секунд
       </div>
 
-      <!-- Кнопка для проверки -->
+      <!-- Индикатор загрузки -->
+      <div id="overlay" class="overlay" style="display: none">
+        <div id="spinner" class="spinner">
+          <div class="spinner-inner"></div>
+        </div>
+      </div>
+
+      <!-- Кнопка для анализа -->
       <div class="button-container">
         <button id="checkButton" disabled>Анализ</button>
       </div>

@@ -99,9 +99,7 @@ function uploadPhoto(event) {
     return;
   }
 
-  const formData = new FormData();
-  formData.append("image", file);
-
+  const formData = new FormData(document.getElementById("uploadForm"));
   fetch("", {
     method: "POST",
     body: formData,
@@ -119,9 +117,7 @@ function uploadPhoto(event) {
 
         currentImageUrl = data.image_url;
         hcgInput.value = "";
-        checkButton.disabled = !(
-          currentImageUrl || document.getElementById("hcg-input").value
-        );
+        checkButton.disabled = !currentImageUrl;
 
         document.getElementById("imageInput").value = "";
       } else if (data.error) {
@@ -174,9 +170,9 @@ function updateProcessingTime() {
     processingTime.textContent = "Примерное время обработки: моментально";
   } else {
     if (smallModel.checked) {
-      processingTime.textContent = "Примерное время обработки: около минуты";
+      processingTime.textContent = "Примерное время обработки: около 10 секунд";
     } else {
-      processingTime.textContent = "Примерное время обработки: около 5 минут";
+      processingTime.textContent = "Примерное время обработки: около 2 минут";
     }
   }
 }
@@ -223,46 +219,80 @@ closeButton.addEventListener("click", () => {
   isModalManuallyClosed = true;
 });
 
+// Обработчик кнопки "Анализ"
 checkButton.addEventListener("click", () => {
   const smallModel = document.getElementById("smallModel");
   const largeModel = document.getElementById("largeModel");
   let selectedModel = null;
 
   if (smallModel.checked) {
-    selectedModel = "Small Model";
+    selectedModel = "Маленькая модель";
   } else if (largeModel.checked) {
-    selectedModel = "Large Model";
+    selectedModel = "Большая модель";
   }
 
-  // Если поле ХГЧ заполнено, анализируем его значение
-  const hcgValue = parseFloat(hcgInput.value);
-  let resultText = `
-    Выбранная модель: ${selectedModel}<br>
-    Загруженное изображение: ${
-      currentImageUrl || "Изображение не загружено"
-    }<br>
-    Дата сдачи анализов: ${formatDate(currentDate)}<br>
+  if (currentImageUrl) {
+    const overlay = document.getElementById("overlay");
+    overlay.style.display = "block";
+
+    const formData = new FormData();
+    formData.append("action", "analyze");
+    formData.append("modelSize", smallModel.checked ? "small" : "large");
+
+    fetch("", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        overlay.style.display = "none";
+        if (data.hcg_value) {
+          displayResult(selectedModel, data.hcg_value);
+        } else if (data.error) {
+          resultContainer.innerHTML = `Ошибка: ${data.error}`;
+          resultContainer.style.display = "block";
+        }
+      })
+      .catch((error) => {
+        overlay.style.display = "none";
+        console.error("Error:", error);
+        alert("Ошибка при анализе изображения.");
+      });
+  } else {
+    displayResult(selectedModel, hcgInput.value);
+  }
+});
+
+function displayResult(selectedModel, hcgValue) {
+  const resultText = `
+      Выбранная модель: ${selectedModel}<br>
+      Загруженное изображение: ${
+        currentImageUrl || "Изображение не загружено"
+      }<br>
+      Дата сдачи анализов: ${formatDate(currentDate)}<br>
   `;
 
-  if (hcgValue || hcgValue === 0) {
-    const pregnancyInfo = calculatePregnancy(hcgValue);
+  if (hcgValue) {
+    const pregnancyInfo = calculatePregnancy(parseFloat(hcgValue) || hcgValue);
     if (!pregnancyInfo.isPregnant) {
-      resultText += "Состояние: Небеременность";
+      resultContainer.innerHTML = resultText + "Состояние: Небеременность";
     } else {
-      resultText += `
-        Состояние: Беременность<br>
-        Срок беременности: ${pregnancyInfo.weeks} недель (${pregnancyInfo.months} месяцев)<br>
-        Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
-        Примерная дата родов: ${pregnancyInfo.dueDate}
-      `;
+      resultContainer.innerHTML =
+        resultText +
+        `
+              Состояние: Беременность<br>
+              Срок беременности: ${pregnancyInfo.weeks} недель (${pregnancyInfo.months} месяцев)<br>
+              Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
+              Примерная дата родов: ${pregnancyInfo.dueDate}
+          `;
     }
   } else {
-    resultText += "Пожалуйста, введите значение ХГЧ для анализа.";
+    resultContainer.innerHTML =
+      resultText +
+      "Пожалуйста, загрузите изображение или введите значение ХГЧ.";
   }
-
-  resultContainer.innerHTML = resultText;
   resultContainer.style.display = "block";
-});
+}
 
 // Инициализация текста времени обработки при загрузке страницы
 updateProcessingTime();

@@ -1,3 +1,7 @@
 Django
 Pillow
 python-decouple
+easyocr
+qwen-vl-utils
+transformers
+accelerate
