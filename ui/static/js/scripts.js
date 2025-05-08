@@ -82,12 +82,31 @@ uploadButton.addEventListener("drop", (event) => {
   uploadPhoto(event);
 });
 
+// Функция для обновления текста времени обработки
+function updateProcessingTime() {
+  const hcgInputValue = hcgInput.value;
+  const smallModel = document.getElementById("smallModel");
+  const processingTime = document.getElementById("processingTime");
+
+  if (hcgInputValue) {
+    processingTime.textContent = "Примерное время обработки: моментально";
+  } else {
+    if (smallModel.checked) {
+      processingTime.textContent = "Примерное время обработки: около минуты";
+    } else {
+      processingTime.textContent = "Примерное время обработки: около 5 минут";
+    }
+  }
+}
+
 // Обработчик ввода в поле HCG
 const hcgInput = document.getElementById("hcg-input");
 const checkButton = document.getElementById("checkButton");
 const resultContainer = document.getElementById("resultContainer");
 const hcgModal = document.getElementById("hcgModal");
 const closeButton = document.querySelector(".close-button");
+const smallModel = document.getElementById("smallModel");
+const largeModel = document.getElementById("largeModel");
 
 hcgInput.addEventListener("input", () => {
   checkButton.disabled = !(currentImageUrl || hcgInput.value);
@@ -97,8 +116,15 @@ hcgInput.addEventListener("input", () => {
   } else if (!hcgInput.value) {
     hcgModal.style.display = "none";
   }
+
+  updateProcessingTime();
 });
 
+// Обработчик изменения выбора модели
+smallModel.addEventListener("change", updateProcessingTime);
+largeModel.addEventListener("change", updateProcessingTime);
+
+// Закрытие модального окна по клику на крестик
 closeButton.addEventListener("click", () => {
   hcgModal.style.display = "none";
   isModalManuallyClosed = true;
@@ -123,3 +149,6 @@ checkButton.addEventListener("click", () => {
   resultContainer.innerHTML = resultText;
   resultContainer.style.display = "block";
 });
+
+// Инициализация текста времени обработки при загрузке страницы
+updateProcessingTime();

@@ -108,7 +108,7 @@ h1 {
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin: 20px 0;
+    margin: 20px 0 5px 0;
 }
 
 .radio-container label {
@@ -119,6 +119,14 @@ h1 {
 
 .radio-container input[type="radio"] {
     margin-right: 5px;
+}
+
+/* Примерное время обработки */
+.processing-time {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-top: 0;
 }
 
 /* Кнопка */
