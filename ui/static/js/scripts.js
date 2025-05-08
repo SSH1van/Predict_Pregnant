@@ -1,5 +1,87 @@
 let currentImageUrl = null;
 let isModalManuallyClosed = false;
+let currentDate = new Date();
+
+// Таблица соотношения ХГЧ и недель беременности
+const hcgRanges = [
+  { week: "Небеременность", min: 0, max: 5 },
+  { week: 2, min: 10, max: 50 }, // 2-3 недели
+  { week: 4, min: 40, max: 1000 }, // 4 недели
+  { week: 5, min: 400, max: 20700 }, // 5 недель
+  { week: 6, min: 2200, max: 74200 }, // 6 недель
+  { week: 7, min: 6000, max: 130000 }, // 7 недель
+  { week: 8, min: 129000, max: 190000 }, // 8 недель
+  { week: 9, min: 18500, max: 205000 }, // 9 недель
+  { week: 10, min: 18000, max: 200000 }, // 10 недель
+  { week: 11, min: 16500, max: 180000 }, // 11 недель
+  { week: 12, min: 14500, max: 125000 }, // 12 недель
+  { week: 13, min: 12500, max: 95000 }, // 13 недель
+  { week: 14, min: 10500, max: 80000 }, // 14 недель
+  { week: 15, min: 9000, max: 70000 }, // 15 недель
+  { week: 16, min: 7000, max: 64000 }, // 16 недель
+  { week: 17, min: 5500, max: 56000 }, // 17 недель
+  { week: 18, min: 4500, max: 50000 }, // 18 недель
+  { week: 19, min: 3300, max: 40000 }, // 19 недель
+  { week: 20, min: 2500, max: 32000 }, // 20 недель
+  { week: 21, min: 1800, max: 25000 }, // 21 неделя
+];
+
+// Функция для форматирования даты в формат ДД.ММ.ГГГГ
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+// Функция для форматирования даты в формат YYYY-MM-DD для input type="date"
+function formatDateForInput(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// Функция для расчёта беременности по ХГЧ
+function calculatePregnancy(hcgValue) {
+  for (const range of hcgRanges) {
+    if (hcgValue >= range.min && hcgValue <= range.max) {
+      if (range.week === "Небеременность") {
+        return { isPregnant: false };
+      }
+      const weeks = range.week;
+      const months = Math.round(weeks / 4); // Примерный перевод недель в месяцы
+
+      // Примерная дата зачатия: текущая дата - срок беременности (в неделях)
+      const conceptionDate = new Date(currentDate);
+      conceptionDate.setDate(currentDate.getDate() - weeks * 7);
+
+      // Примерная дата родов: 40 недель (средний срок беременности) - текущий срок
+      const dueDate = new Date(currentDate);
+      const remainingWeeks = 40 - weeks;
+      dueDate.setDate(currentDate.getDate() + remainingWeeks * 7);
+
+      return {
+        isPregnant: true,
+        weeks: weeks,
+        months: months,
+        conceptionDate: formatDate(conceptionDate),
+        dueDate: formatDate(dueDate),
+      };
+    }
+  }
+  // Если значение ХГЧ не попадает в диапазоны, но больше 5, всё равно считаем беременностью
+  if (hcgValue > 5) {
+    return {
+      isPregnant: true,
+      weeks: "не определено (значение ХГЧ вне стандартных диапазонов)",
+      months: "не определено",
+      conceptionDate: "не определено",
+      dueDate: "не определено",
+    };
+  }
+  return { isPregnant: false };
+}
 
 function uploadPhoto(event) {
   let file;
@@ -107,6 +189,17 @@ const hcgModal = document.getElementById("hcgModal");
 const closeButton = document.querySelector(".close-button");
 const smallModel = document.getElementById("smallModel");
 const largeModel = document.getElementById("largeModel");
+const analysisDateInput = document.getElementById("analysis-date");
+
+// Устанавливаем текущую дату в поле при загрузке страницы
+analysisDateInput.value = formatDateForInput(currentDate);
+
+// Обновление currentDate при изменении даты
+analysisDateInput.addEventListener("change", () => {
+  const dateValue = analysisDateInput.value; // Формат YYYY-MM-DD
+  const [year, month, day] = dateValue.split("-").map(Number);
+  currentDate = new Date(year, month - 1, day); // Месяцы начинаются с 0
+});
 
 hcgInput.addEventListener("input", () => {
   checkButton.disabled = !(currentImageUrl || hcgInput.value);
@@ -141,10 +234,31 @@ checkButton.addEventListener("click", () => {
     selectedModel = "Large Model";
   }
 
-  const resultText = `
+  // Если поле ХГЧ заполнено, анализируем его значение
+  const hcgValue = parseFloat(hcgInput.value);
+  let resultText = `
     Выбранная модель: ${selectedModel}<br>
-    Загруженное изображение: ${currentImageUrl || "Изображение не загружено"}
+    Загруженное изображение: ${
+      currentImageUrl || "Изображение не загружено"
+    }<br>
+    Дата сдачи анализов: ${formatDate(currentDate)}<br>
   `;
+
+  if (hcgValue || hcgValue === 0) {
+    const pregnancyInfo = calculatePregnancy(hcgValue);
+    if (!pregnancyInfo.isPregnant) {
+      resultText += "Состояние: Небеременность";
+    } else {
+      resultText += `
+        Состояние: Беременность<br>
+        Срок беременности: ${pregnancyInfo.weeks} недель (${pregnancyInfo.months} месяцев)<br>
+        Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
+        Примерная дата родов: ${pregnancyInfo.dueDate}
+      `;
+    }
+  } else {
+    resultText += "Пожалуйста, введите значение ХГЧ для анализа.";
+  }
 
   resultContainer.innerHTML = resultText;
   resultContainer.style.display = "block";
