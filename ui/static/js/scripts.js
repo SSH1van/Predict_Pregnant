@@ -239,7 +239,11 @@ checkButton.addEventListener("click", () => {
     selectedModel = "Большая модель";
   }
 
-  if (currentImageUrl) {
+  const hcgValue = parseFloat(hcgInput.value);
+
+  if (hcgValue || hcgValue === 0) {
+    displayResult(hcgValue);
+  } else {
     const overlay = document.getElementById("overlay");
     overlay.style.display = "block";
 
@@ -266,8 +270,6 @@ checkButton.addEventListener("click", () => {
         console.error("Error:", error);
         alert("Ошибка при анализе изображения.");
       });
-  } else {
-    displayResult(hcgInput.value);
   }
 });
 
