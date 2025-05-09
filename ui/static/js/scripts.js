@@ -93,18 +93,24 @@ function uploadPhoto(event) {
 
   if (!file) return;
 
-  // Проверка MIME-типа файла (опционально)
   if (!file.type.match("image/jpeg")) {
     alert("Пожалуйста, загрузите файл в формате JPG.");
     return;
   }
 
-  const formData = new FormData(document.getElementById("uploadForm"));
+  const formData = new FormData();
+  formData.append("image", file);
+
   fetch("", {
     method: "POST",
     body: formData,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Ошибка сети или сервера: " + response.status);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.image_url) {
         const uploadText = document.getElementById("uploadText");
@@ -117,6 +123,8 @@ function uploadPhoto(event) {
 
         currentImageUrl = data.image_url;
         hcgInput.value = "";
+        hcgModal.style.display = "none";
+        updateProcessingTime();
         checkButton.disabled = !currentImageUrl;
 
         document.getElementById("imageInput").value = "";
