@@ -8,6 +8,7 @@ from django.conf import settings
 import easyocr
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from qwen_vl_utils import process_vision_info
+import re
 
 # Инициализация моделей
 TEMP_DIR = 'temp'
@@ -63,7 +64,7 @@ def home(request):
                 return JsonResponse({'error': 'Изображение не загружено'}, status=400)
 
             small_model_selected = request.POST.get('modelSize') == 'small'
-            hcg_value = extract_hcg(photo_path, small_model_selected)
+            hcg_value = extract_hcg_from_image(photo_path, small_model_selected)
 
             return JsonResponse({'hcg_value': hcg_value})
     
@@ -80,15 +81,10 @@ def home(request):
     
     return render(request, 'home.html', {'photo_url': None})
 
-def extract_hcg(image_path, use_small_model=True):
+def extract_hcg_from_image(image_path, use_small_model=True):
     if use_small_model:
         result = reader.readtext(image_path, detail=0)
-        print(result)
-        return 1
-        # for text in result:
-        #     if any(char.isdigit() for char in text):
-        #         return text
-        # return "ХГЧ не обнаружен"
+        return extract_hcg_easyocr('\n'.join(result))
     else:
         messages = [
             {
@@ -116,5 +112,77 @@ def extract_hcg(image_path, use_small_model=True):
         output_text = processor.batch_decode(
             generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
         )[0]
-        print(output_text)
-        return 1
+        return extract_hcg_qwen(output_text)
+
+# Извлечение ХГЧ для EasyOCR
+def clean_number(text):
+    text = text.replace('\xa0', ' ').replace(' ', '')
+    text = text.replace(',', '.')
+    return text
+
+def normalize_text(text):
+    text = re.sub(r'\s+', ' ', text.replace('\xa0', ' ').strip())
+    return text
+
+def extract_hcg_easyocr(text):
+    text = normalize_text(text)
+
+    unit_patterns = [
+        r'mIU/ml', r'mME/ml', r'mEd/ml', r'IU/l', r'IU/L', r'mIU/L',
+        r'мЕ/мл', r'мМЕ/мл', r'мЕд/мл', r'МЕ/мл', r'IU/I', r'U/L'
+    ]
+    unit_pattern = '|'.join(unit_patterns)
+    
+    pattern = r'(?i)ХГЧ\s*(?:общий)?\s*([\d,. ]+)\s*(' + unit_pattern + r')?'
+    
+    match = re.search(pattern, text)
+    
+    if not match:
+        value_pattern = r'(?i)ХГЧ\s*(?:общий)?\s*([\d,. ]+)'
+        value_match = re.search(value_pattern, text)
+        if value_match:
+            try:
+                value = float(clean_number(value_match.group(1)))
+                return value
+            except ValueError:
+                return None
+        return None
+    
+    try:
+        value = float(clean_number(match.group(1)))
+        unit = match.group(2) if match.group(2) else 'мМЕ/мл'
+        
+        if unit.lower() in ['iu/l', 'iu/i', 'u/l']:
+            value = value * 1000
+        
+        return value
+    except (ValueError, IndexError):
+        return None
+    
+# Извлечение ХГЧ для Qwen2-VL
+def extract_hcg_qwen(text):
+    clean_string = text.replace('<|im_end|>', '').strip()
+    
+    value_match = re.match(r'The HCG value is (\d+\.?\d*)\b', clean_string)
+    if not value_match:
+        return None
+    
+    value = float(value_match.group(1))
+    
+    unit_patterns = [
+        (r'IU/I\b', 'IU/I'),  # Формат: "1.11 IU/I"
+        (r'mE/mL\b', 'mE/mL'),  # Формат: "1517 mE/mL"
+        (r',\s*and the unit of measurement is [\'"]([^\'"]+)[\'"]', None),  # Формат: "1.20, and the unit of measurement is 'МЕ/мл'"
+        (r',\s*and the unit of measurement is (\w+)', None),  # Формат: "11701.86, and the unit of measurement is мМЕ/мл"
+    ]
+    
+    # Поиск единицы измерения
+    unit = None
+    for pattern, default_unit in unit_patterns:
+        unit_match = re.search(pattern, clean_string)
+        if unit_match:
+            unit = unit_match.group(1) if unit_match.groups() else default_unit
+            break
+    if unit in ['МЕ/мл', 'IU/I', 'мЕ/мл', 'mE/mL']:
+        return value * 1000
+    return value

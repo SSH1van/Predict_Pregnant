@@ -180,7 +180,7 @@ function updateProcessingTime() {
     if (smallModel.checked) {
       processingTime.textContent = "Примерное время обработки: около 10 секунд";
     } else {
-      processingTime.textContent = "Примерное время обработки: около 2 минут";
+      processingTime.textContent = "Примерное время обработки: около 5 минут";
     }
   }
 }
@@ -254,11 +254,11 @@ checkButton.addEventListener("click", () => {
       .then((response) => response.json())
       .then((data) => {
         overlay.style.display = "none";
-        if (data.hcg_value) {
-          displayResult(selectedModel, data.hcg_value);
-        } else if (data.error) {
+        if (data.error) {
           resultContainer.innerHTML = `Ошибка: ${data.error}`;
           resultContainer.style.display = "block";
+        } else {
+          displayResult(data.hcg_value);
         }
       })
       .catch((error) => {
@@ -267,38 +267,33 @@ checkButton.addEventListener("click", () => {
         alert("Ошибка при анализе изображения.");
       });
   } else {
-    displayResult(selectedModel, hcgInput.value);
+    displayResult(hcgInput.value);
   }
 });
 
-function displayResult(selectedModel, hcgValue) {
-  const resultText = `
-      Выбранная модель: ${selectedModel}<br>
-      Загруженное изображение: ${
-        currentImageUrl || "Изображение не загружено"
-      }<br>
-      Дата сдачи анализов: ${formatDate(currentDate)}<br>
-  `;
+function displayResult(hcgValue) {
+  if (!hcgValue && hcgValue !== 0) {
+    resultContainer.innerHTML =
+      "Не удалось извечь значение ХГЧ. Попробуйте загрузить другое изображение или ввести значение ХГЧ вручную";
+    resultContainer.style.display = "block";
+    return;
+  }
+  const resultText = `Дата сдачи анализов: ${formatDate(currentDate)}<br>`;
 
-  if (hcgValue) {
-    const pregnancyInfo = calculatePregnancy(parseFloat(hcgValue) || hcgValue);
-    if (!pregnancyInfo.isPregnant) {
-      resultContainer.innerHTML = resultText + "Состояние: Небеременность";
-    } else {
-      resultContainer.innerHTML =
-        resultText +
-        `
-              Состояние: Беременность<br>
-              Срок беременности: недели – ${pregnancyInfo.weeks} (месяцы – ${pregnancyInfo.months})<br>
-              Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
-              Примерная дата родов: ${pregnancyInfo.dueDate}
-          `;
-    }
+  const pregnancyInfo = calculatePregnancy(parseFloat(hcgValue) || hcgValue);
+  if (!pregnancyInfo.isPregnant) {
+    resultContainer.innerHTML = resultText + "Состояние: Небеременность";
   } else {
     resultContainer.innerHTML =
       resultText +
-      "Пожалуйста, загрузите изображение или введите значение ХГЧ.";
+      `
+        Состояние: Беременность<br>
+        Срок беременности: недели – ${pregnancyInfo.weeks} (месяцы – ${pregnancyInfo.months})<br>
+        Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
+        Примерная дата родов: ${pregnancyInfo.dueDate}
+        `;
   }
+
   resultContainer.style.display = "block";
 }
 
