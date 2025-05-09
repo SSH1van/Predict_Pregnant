@@ -289,7 +289,7 @@ function displayResult(selectedModel, hcgValue) {
         resultText +
         `
               Состояние: Беременность<br>
-              Срок беременности: ${pregnancyInfo.weeks} недель (${pregnancyInfo.months} месяцев)<br>
+              Срок беременности: недели – ${pregnancyInfo.weeks} (месяцы – ${pregnancyInfo.months})<br>
               Примерная дата зачатия: ${pregnancyInfo.conceptionDate}<br>
               Примерная дата родов: ${pregnancyInfo.dueDate}
           `;
