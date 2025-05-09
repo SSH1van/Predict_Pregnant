@@ -1,7 +1,7 @@
-Django
-Pillow
-python-decouple
-easyocr
-qwen-vl-utils
-transformers
-accelerate
+Django==5.2
+Pillow==11.2.1
+python-decouple==3.8
+easyocr==1.7.2
+qwen-vl-utils==0.0.11
+transformers==4.51.3
+accelerate==1.6.0
