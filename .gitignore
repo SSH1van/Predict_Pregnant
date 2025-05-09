@@ -91,3 +91,4 @@ db.sqlite3
 ### Project ###
 media
 model.safetensors
+staticfiles
