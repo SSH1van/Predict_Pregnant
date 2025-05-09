@@ -95,7 +95,7 @@ def extract_hcg(image_path, use_small_model=True):
                 "role": "user",
                 "content": [
                     {"type": "image", "image": image_path},
-                    {"type": "text", "text": "Извлеки значение ХГЧ"},
+                    {"type": "text", "text": "Extract the HCG value and the unit of measurement 'МЕ/мл', 'мМЕ/мл', 'мЕд/мл', 'IU/I'"},
                 ],
             }
         ]
