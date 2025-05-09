@@ -27,9 +27,9 @@ SESSION_COOKIE_AGE = 3600
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["5973-92-118-9-48.ngrok-free.app", "127.0.0.1", "localhost"]
 
 
 # Application definition
