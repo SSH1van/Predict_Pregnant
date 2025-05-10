@@ -26,6 +26,23 @@ const hcgRanges = [
   { week: 21, min: 1800, max: 25000 }, // 21 неделя
 ];
 
+// Получение CSRF-токена из cookie
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie("csrftoken");
+
 // Функция для форматирования даты в формат ДД.ММ.ГГГГ
 function formatDate(date) {
   const day = String(date.getDate()).padStart(2, "0");
@@ -104,6 +121,9 @@ function uploadPhoto(event) {
   fetch("", {
     method: "POST",
     body: formData,
+    headers: {
+      "X-CSRFToken": csrftoken,
+    },
   })
     .then((response) => {
       if (!response.ok) {
@@ -254,6 +274,9 @@ checkButton.addEventListener("click", () => {
     fetch("", {
       method: "POST",
       body: formData,
+      headers: {
+        "X-CSRFToken": csrftoken,
+      },
     })
       .then((response) => response.json())
       .then((data) => {
