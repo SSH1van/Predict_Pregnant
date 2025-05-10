@@ -145,6 +145,7 @@ function uploadPhoto(event) {
         hcgInput.value = "";
         hcgModal.style.display = "none";
         updateProcessingTime();
+        resultContainer.style.display = "none";
         checkButton.disabled = !currentImageUrl;
 
         document.getElementById("imageInput").value = "";
