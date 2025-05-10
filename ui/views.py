@@ -159,29 +159,62 @@ def extract_hcg_easyocr(text):
         return None
     
 # Извлечение ХГЧ для Qwen2-VL
-def extract_hcg_qwen(text):
-    clean_string = text.replace('<|im_end|>', '').strip()
-    
-    value_match = re.match(r'The HCG value is (\d+\.?\d*)\b', clean_string)
+def extract_hcg_qwen(hcg_string):
+    clean_string = hcg_string.replace('<|im_end|>', '').strip().replace("'", "").replace('"', '').lower()
+
+    value_match = re.search(r'\b(\d*\.?\d+)\b', clean_string)
     if not value_match:
         return None
-    
     value = float(value_match.group(1))
-    
-    unit_patterns = [
-        (r'IU/I\b', 'IU/I'),  # Формат: "1.11 IU/I"
-        (r'mE/mL\b', 'mE/mL'),  # Формат: "1517 mE/mL"
-        (r',\s*and the unit of measurement is [\'"]([^\'"]+)[\'"]', None),  # Формат: "1.20, and the unit of measurement is 'МЕ/мл'"
-        (r',\s*and the unit of measurement is (\w+)', None),  # Формат: "11701.86, and the unit of measurement is мМЕ/мл"
-    ]
-    
-    # Поиск единицы измерения
+
+    # Сопоставление вариаций единиц измерения с основными
+    unit_mapping = {
+        'iu/i': 'iu/i',
+        'iu/l': 'iu/i',
+        'iu i': 'iu/i',
+        'iu-i': 'iu/i',
+        'miu/ml': 'iu/i',
+        'iu/ml': 'iu/i',
+        'iui': 'iu/i',
+        'me/ml': 'me/ml',
+        'me ml': 'me/ml',
+        'meml': 'me/ml',
+        'me-ml': 'me/ml',
+        'me / ml': 'me/ml',
+        'ме/мл': 'ме/мл',
+        'ме мл': 'ме/мл',
+        'мемл': 'ме/мл',
+        'ме-мл': 'ме/мл',
+        'ме / мл': 'ме/мл',
+        'me/мл': 'ме/мл',
+        'мe/мл': 'ме/мл',
+        'мме/мл': 'мме/мл',
+        'мме мл': 'мме/мл',
+        'ммемл': 'мме/мл',
+        'мме-мл': 'мме/мл',
+        'мме / мл': 'мме/мл',
+        'mme/мл': 'мме/мл',
+        'мmе/мл': 'мме/мл',
+    }
+
+    # Поиск единицы измерения, сортировка ключей по убыванию длины
     unit = None
-    for pattern, default_unit in unit_patterns:
-        unit_match = re.search(pattern, clean_string)
-        if unit_match:
-            unit = unit_match.group(1) if unit_match.groups() else default_unit
+    for possible_unit in sorted(unit_mapping.keys(), key=len, reverse=True):
+        if possible_unit in clean_string:
+            unit = unit_mapping[possible_unit]
             break
-    if unit in ['МЕ/мл', 'IU/I', 'мЕ/мл', 'mE/mL']:
+
+    # Если единица измерения не найдена, ищем в окрестности числа
+    if not unit:
+        unit_match = re.search(r'\b(\w+/?\w*)\b', clean_string[value_match.end():].strip())
+        if unit_match and unit_match.group(1) in unit_mapping:
+            unit = unit_mapping[unit_match.group(1)]
+
+    # Если единица измерения не найдена, считаем мМЕ/мл по умолчанию
+    if not unit:
+        return value
+
+    # Конверсия в мМЕ/мл
+    if unit in ['ме/мл', 'iu/i', 'me/ml']:
         return value * 1000
     return value
