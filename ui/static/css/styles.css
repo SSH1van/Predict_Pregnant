@@ -209,6 +209,7 @@ h1 {
 /* Модальное окно */
 .modal {
     position: fixed;
+    top: -100%;
     right: 20px;
     z-index: 1000;
     width: 320px;
