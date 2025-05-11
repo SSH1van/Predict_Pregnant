@@ -262,18 +262,22 @@ hcgInput.addEventListener("input", () => {
 });
 
 // Обработчик изменения выбора модели
-smallModel.addEventListener("change", function() {
+smallModel.addEventListener("change", function () {
   updateProcessingTime();
 });
 
-largeModel.addEventListener("change", function() {
+largeModel.addEventListener("change", function () {
   if (this.checked && !isLargeModelConfirmed) {
-    if (!confirm("Выбор большой модели требует значительных ресурсов. Рекомендуется 16 ГБ ОЗУ с файлом подкачки 24-32 ГБ Продолжить?")) {
+    if (
+      !confirm(
+        "Выбор большой модели требует значительных ресурсов. Рекомендуется 16 ГБ ОЗУ с файлом подкачки 24-32 ГБ Продолжить?"
+      )
+    ) {
       smallModel.checked = true;
-      console.log(1)
+      console.log(1);
     } else {
       isLargeModelConfirmed = true;
-      console.log(2)
+      console.log(2);
     }
   }
   updateProcessingTime();
