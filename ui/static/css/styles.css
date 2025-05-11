@@ -208,12 +208,11 @@ h1 {
 
 /* Модальное окно */
 .modal {
-    display: none;
     position: fixed;
-    top: 20px;
     right: 20px;
     z-index: 1000;
     width: 320px;
+    transition: top 0.5s ease-in-out;
 }
 
 .modal-content {
@@ -221,7 +220,6 @@ h1 {
     padding: 20px;
     border: 2px solid #007bff;
     border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
     font-size: 16px;
     color: #333;
     position: relative;
@@ -286,7 +284,6 @@ h1 {
     .modal {
         width: 90%;
         right: 5%;
-        top: 10px;
     }
 
     .modal-content {

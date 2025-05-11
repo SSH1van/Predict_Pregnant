@@ -143,7 +143,7 @@ function uploadPhoto(event) {
 
         currentImageUrl = data.image_url;
         hcgInput.value = "";
-        hcgModal.style.display = "none";
+        hideModal();
         updateProcessingTime();
         resultContainer.style.display = "none";
         checkButton.disabled = !currentImageUrl;
@@ -216,6 +216,27 @@ const smallModel = document.getElementById("smallModel");
 const largeModel = document.getElementById("largeModel");
 const analysisDateInput = document.getElementById("analysis-date");
 
+// Функции для показа и скрытия модального окна
+function showModal() {
+  if (!hcgModal.style.top) {
+    const modalHeight = hcgModal.offsetHeight;
+    hcgModal.style.top = `-${modalHeight + 20}px`;
+  }
+  setTimeout(() => {
+    hcgModal.style.top = `20px`;
+  }, 200);
+}
+
+function hideModal() {
+  setTimeout(() => {
+    const modalHeight = hcgModal.offsetHeight;
+    hcgModal.style.top = `-${modalHeight + 20}px`;
+  }, 200);
+}
+
+const modalHeight = hcgModal.offsetHeight;
+hcgModal.style.top = `-${modalHeight + 20}px`;
+
 // Устанавливаем текущую дату в поле при загрузке страницы
 analysisDateInput.value = formatDateForInput(currentDate);
 
@@ -230,9 +251,9 @@ hcgInput.addEventListener("input", () => {
   checkButton.disabled = !(currentImageUrl || hcgInput.value);
 
   if (hcgInput.value && !isModalManuallyClosed) {
-    hcgModal.style.display = "block";
-  } else if (!hcgInput.value) {
-    hcgModal.style.display = "none";
+    showModal();
+  } else {
+    hideModal();
   }
 
   updateProcessingTime();
@@ -244,7 +265,7 @@ largeModel.addEventListener("change", updateProcessingTime);
 
 // Закрытие модального окна по клику на крестик
 closeButton.addEventListener("click", () => {
-  hcgModal.style.display = "none";
+  hideModal();
   isModalManuallyClosed = true;
 });
 
