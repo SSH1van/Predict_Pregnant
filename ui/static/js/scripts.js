@@ -1,6 +1,7 @@
 let currentImageUrl = null;
 let isModalManuallyClosed = false;
 let currentDate = new Date();
+let isLargeModelConfirmed = false;
 
 // Таблица соотношения ХГЧ и недель беременности
 const hcgRanges = [
@@ -261,8 +262,22 @@ hcgInput.addEventListener("input", () => {
 });
 
 // Обработчик изменения выбора модели
-smallModel.addEventListener("change", updateProcessingTime);
-largeModel.addEventListener("change", updateProcessingTime);
+smallModel.addEventListener("change", function() {
+  updateProcessingTime();
+});
+
+largeModel.addEventListener("change", function() {
+  if (this.checked && !isLargeModelConfirmed) {
+    if (!confirm("Выбор большой модели требует значительных ресурсов. Рекомендуется 16 ГБ ОЗУ с файлом подкачки 24-32 ГБ Продолжить?")) {
+      smallModel.checked = true;
+      console.log(1)
+    } else {
+      isLargeModelConfirmed = true;
+      console.log(2)
+    }
+  }
+  updateProcessingTime();
+});
 
 // Закрытие модального окна по клику на крестик
 closeButton.addEventListener("click", () => {

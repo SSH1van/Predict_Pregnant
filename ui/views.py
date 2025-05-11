@@ -20,16 +20,10 @@ reader = easyocr.Reader(
     model_storage_directory=os.path.join(settings.BASE_DIR, 'models/easyocr/')
 )
 
-# Qwen2-VL для большой модели
-model_path = os.path.join(settings.BASE_DIR, 'models/qwen_vl_utils')
-model = Qwen2VLForConditionalGeneration.from_pretrained(
-    model_path,
-    torch_dtype="auto",
-    device_map="auto"
-)
-processor = AutoProcessor.from_pretrained(model_path, use_fast=True)
+# Глобальные переменные для Qwen2-VL
+model = None
+processor = None
 
-@csrf_exempt
 def home(request):
     if request.method == 'POST':
         if request.FILES.get('image'):  # Обработка загрузки изображения
@@ -82,10 +76,22 @@ def home(request):
     return render(request, 'home.html', {'photo_url': None})
 
 def extract_hcg_from_image(image_path, use_small_model=True):
+    global model, processor
+
     if use_small_model:
         result = reader.readtext(image_path, detail=0)
         return extract_hcg_easyocr('\n'.join(result))
     else:
+        # Ленивая инициализация Qwen2-VL
+        if model is None or processor is None:
+            model_path = os.path.join(settings.BASE_DIR, 'models/qwen_vl_utils')
+            model = Qwen2VLForConditionalGeneration.from_pretrained(
+                model_path,
+                torch_dtype="auto",
+                device_map="auto"
+            )
+            processor = AutoProcessor.from_pretrained(model_path, use_fast=True)
+
         messages = [
             {
                 "role": "user",
