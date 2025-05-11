@@ -224,14 +224,14 @@ function showModal() {
   }
   setTimeout(() => {
     hcgModal.style.top = `20px`;
-  }, 200);
+  }, 100);
 }
 
 function hideModal() {
   setTimeout(() => {
     const modalHeight = hcgModal.offsetHeight;
     hcgModal.style.top = `-${modalHeight + 20}px`;
-  }, 200);
+  }, 100);
 }
 
 const modalHeight = hcgModal.offsetHeight;
