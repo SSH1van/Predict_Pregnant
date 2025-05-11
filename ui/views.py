@@ -29,6 +29,7 @@ model = Qwen2VLForConditionalGeneration.from_pretrained(
 )
 processor = AutoProcessor.from_pretrained(model_path, use_fast=True)
 
+@csrf_exempt
 def home(request):
     if request.method == 'POST':
         if request.FILES.get('image'):  # Обработка загрузки изображения

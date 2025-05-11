@@ -124,6 +124,7 @@ function uploadPhoto(event) {
     headers: {
       "X-CSRFToken": csrftoken,
     },
+    credentials: "include",
   })
     .then((response) => {
       if (!response.ok) {
@@ -299,6 +300,7 @@ checkButton.addEventListener("click", () => {
       headers: {
         "X-CSRFToken": csrftoken,
       },
+      credentials: "include",
     })
       .then((response) => response.json())
       .then((data) => {
